@@ -24,10 +24,17 @@ using OpacityPoint = vec2f;
 class TransferFunctionWidget
 {
  public:
-  TransferFunctionWidget(
-      std::function<void(const range1f &, const std::vector<vec4f> &)>
-          transferFunctionUpdatedCallback,
-      const range1f &valueRange     = range1f(-1.f, 1.f),
+  // callback called whenever transfer function is updated
+
+  using TransferFunctionUpdatedCallback =
+      std::function<void(const range1f & /*valueRange*/,
+          const std::vector<vec4f> & /*colorPoints*/,
+          const std::vector<vec2f> & /*opacityColors*/,
+          const std::vector<vec3f> & /*colors*/,
+          const std::vector<float> & /*opacities*/)>;
+
+  TransferFunctionWidget(TransferFunctionUpdatedCallback updatedCallback,
+      const range1f &valueRange = range1f(-1.f, 1.f),
       const std::string &widgetName = "Transfer Function");
   ~TransferFunctionWidget();
 
@@ -36,9 +43,14 @@ class TransferFunctionWidget
 
   // setters/getters for current transfer function data
   void setValueRange(const range1f &);
-  void setColorsAndOpacities(const std::vector<vec4f> &);
+  void setColorPointsAndOpacityPoints(
+      const std::vector<vec4f> &, const std::vector<vec2f> &);
+
   range1f getValueRange();
-  std::vector<vec4f> getSampledColorsAndOpacities(int numSamples = 256);
+  std::tuple<std::vector<vec3f>, std::vector<float>> getColorsAndOpacities(
+      int numSamples = 256);
+  std::tuple<std::vector<vec4f>, std::vector<vec2f>>
+  getColorPointsAndOpacityPoints();
 
  private:
   void loadDefaultMaps();
@@ -53,9 +65,9 @@ class TransferFunctionWidget
 
   void drawEditor();
 
-  // callback called whenever transfer function is updated
-  std::function<void(const range1f &, const std::vector<vec4f> &)>
-      transferFunctionUpdatedCallback{nullptr};
+  void invokeUpdatedCallback();
+
+  TransferFunctionUpdatedCallback updatedCallback{nullptr};
 
   // all available transfer functions
   std::vector<ospray::sg::NodePtr> tfnsNodes;

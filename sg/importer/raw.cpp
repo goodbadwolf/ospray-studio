@@ -83,10 +83,10 @@ void RawImporter::importScene()
       structuredVolume->load(fileName);
     }
 
-    auto tf = createNode("transferFunction", "transfer_function_turbo");
+    auto &tf =
+        getOrCreateTransferFunctionNode(volume, "transfer_function_turbo");
     auto valueRange = volume->child("value").valueAs<range1f>();
-    tf->child("value") = valueRange;
-    volume->add(tf);
+    tf.child("value") = valueRange;
 
     rootNode->add(volume);
 

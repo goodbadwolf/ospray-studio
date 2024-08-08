@@ -31,5 +31,20 @@ namespace ospray {
   {
   }
 
+  sg::TransferFunction &Generator::getOrCreateTransferFunctionNode(
+      const std::string &subType)
+  {
+    const std::string tfName = "transferFunction";
+    auto &xfm = child("xfm");
+    std::shared_ptr<TransferFunction> tfPtr = nullptr;
+    if (xfm.hasChild(tfName)) {
+      tfPtr = xfm.childNodeAs<TransferFunction>(tfName);
+    } else {
+      tfPtr = xfm.createChildAs<TransferFunction>(tfName, subType)
+                  .nodeAs<TransferFunction>();
+    }
+    return *tfPtr;
+  }
+
   }  // namespace sg
 } // namespace ospray

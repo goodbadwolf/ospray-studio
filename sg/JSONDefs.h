@@ -8,6 +8,7 @@
 #include "Node.h"
 #include "importer/Importer.h"
 #include "scene/lights/LightsManager.h"
+#include "scene/transfer_function/TransferFunction.h"
 
 #include "ArcballCamera.h"
 
@@ -97,6 +98,50 @@ inline void to_json(JSON &j, const Node &n)
       j["minMax"] = JSON{n.min(), n.max()};
   }
 
+  if (n.type() == NodeType::TRANSFER_FUNCTION) {
+    auto tf = n.nodeAs<const TransferFunction>();
+
+    std::vector<float> colorPointsX, colorPointsR, colorPointsG, colorPointsB;
+    std::vector<float> opacityPointsX, opacityPointsO;
+    std::for_each(tf->colorPoints.begin(),
+        tf->colorPoints.end(),
+        [&colorPointsX, &colorPointsR, &colorPointsG, &colorPointsB](
+            const vec4f &v) {
+          colorPointsX.push_back(v.x);
+          colorPointsR.push_back(v.y);
+          colorPointsG.push_back(v.z);
+          colorPointsB.push_back(v.w);
+        });
+    std::for_each(tf->opacityPoints.begin(),
+        tf->opacityPoints.end(),
+        [&opacityPointsX, &opacityPointsO](const vec2f &v) {
+          opacityPointsX.push_back(v.x);
+          opacityPointsO.push_back(v.y);
+        });
+    std::vector<float> colorsR, colorsG, colorsB, opacities;
+    std::for_each(tf->colors.begin(),
+        tf->colors.end(),
+        [&colorsR, &colorsG, &colorsB](const vec3f &v) {
+          colorsR.push_back(v.x);
+          colorsG.push_back(v.y);
+          colorsB.push_back(v.z);
+        });
+    opacities = tf->opacities;
+
+#define ADD_TF_DATA(DATA) j["value"][#DATA] = DATA;
+    ADD_TF_DATA(colorPointsX);
+    ADD_TF_DATA(colorPointsR);
+    ADD_TF_DATA(colorPointsG);
+    ADD_TF_DATA(colorPointsB);
+    ADD_TF_DATA(opacityPointsX);
+    ADD_TF_DATA(opacityPointsO);
+    ADD_TF_DATA(colorsR);
+    ADD_TF_DATA(colorsG);
+    ADD_TF_DATA(colorsB);
+    ADD_TF_DATA(opacities);
+#undef ADD_TF_DATA
+  }
+
   if (n.hasChildren())
     j["children"] = n.children();
 }
@@ -150,7 +195,56 @@ inline OSPSG_INTERFACE NodePtr createNodeFromJSON(const JSON &j)
   FIX_SUBTYPE(filter, OSPTextureWrapMode);
   FIX_SUBTYPE(format, OSPTextureFormat);
 
-  if (j.contains("value")) {
+  if (j["type"] == "TRANSFER_FUNCTION" && j.contains("value")) {
+    n = createNode(j["name"], subType);
+    auto tf = n->nodeAs<TransferFunction>();
+    auto &value = j["value"];
+
+    bool hasColorPoints = value.contains("colorPointsX")
+        && value.contains("colorPointsR") && value.contains("colorPointsG")
+        && value.contains("colorPointsB");
+    bool hasOpacityPoints =
+        value.contains("opacityPointsX") && value.contains("opacityPointsO");
+
+    bool hasColors = value.contains("colorsR") && value.contains("colorsG")
+        && value.contains("colorsB");
+    bool hasOpacities = value.contains("opacities");
+
+    if (hasColorPoints && hasOpacityPoints) {
+#define GET_TF_DATA(DATA) DATA = value[#DATA].get<std::vector<float>>();
+      std::vector<float> colorPointsX, colorPointsR, colorPointsG, colorPointsB;
+      std::vector<float> opacityPointsX, opacityPointsO;
+      std::vector<float> colorsR, colorsG, colorsB, opacities;
+      GET_TF_DATA(colorPointsX);
+      GET_TF_DATA(colorPointsR);
+      GET_TF_DATA(colorPointsG);
+      GET_TF_DATA(colorPointsB);
+      GET_TF_DATA(opacityPointsX);
+      GET_TF_DATA(opacityPointsO);
+      GET_TF_DATA(colorsR);
+      GET_TF_DATA(colorsG);
+      GET_TF_DATA(colorsB);
+      GET_TF_DATA(opacities);
+#undef GET_TF_DATA
+
+      std::vector<vec4f> colorPoints;
+      std::vector<vec2f> opacityPoints;
+      for (size_t i = 0; i < colorPointsX.size(); i++)
+        colorPoints.push_back(vec4f(colorPointsX[i],
+            colorPointsR[i],
+            colorPointsG[i],
+            colorPointsB[i]));
+      for (size_t i = 0; i < opacityPointsX.size(); i++)
+        opacityPoints.push_back(vec2f(opacityPointsX[i], opacityPointsO[i]));
+
+      std::vector<vec3f> colors;
+      for (size_t i = 0; i < colorsR.size(); i++)
+        colors.push_back(vec3f(colorsR[i], colorsG[i], colorsB[i]));
+
+      tf->setColorPointsAndOpacityPoints(colorPoints, opacityPoints);
+      tf->setColorsAndOpacties(colors, opacities);
+    }
+  } else if (j.contains("value")) {
     Any value;
 
     // Stored in scene file as basic JSON objects.  Rather than trying to infer

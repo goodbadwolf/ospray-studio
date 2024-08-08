@@ -130,6 +130,9 @@ struct OSPSG_INTERFACE Importer : public Node
   bool verboseImport{false};
 
  protected:
+  virtual sg::TransferFunction &getOrCreateTransferFunctionNode(
+      sg::NodePtr const node, const std::string &subType);
+
   rkcommon::FileName fileName;
   std::shared_ptr<sg::MaterialRegistry> materialRegistry = nullptr;
   std::shared_ptr<CameraMap> cameras{nullptr};

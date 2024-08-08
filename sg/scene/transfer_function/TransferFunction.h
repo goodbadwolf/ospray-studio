@@ -14,6 +14,14 @@ struct OSPSG_INTERFACE TransferFunction
   TransferFunction(const std::string &osp_type);
   ~TransferFunction() override = default;
 
+  void setColorPointsAndOpacityPoints(const std::vector<vec4f> &colorPoints,
+      const std::vector<vec2f> &opacityPoints);
+
+  void setColorsAndOpacties(
+      const std::vector<vec3f> &colors, const std::vector<float> &opacities);
+
+  std::vector<vec4f> colorPoints;
+  std::vector<vec2f> opacityPoints;
   std::vector<vec3f> colors;
   std::vector<float> opacities;
 

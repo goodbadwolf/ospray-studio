@@ -772,30 +772,15 @@ void WindowsBuilder::buildWindowTransferFunctionEditor()
     // Called by TransferFunctionWidget to update selected TFn
     auto transferFunctionUpdatedCallback =
         [&](const range1f &valueRange,
-            const std::vector<vec4f> &colorsAndOpacities) {
+            const std::vector<vec4f> &colorPoints,
+            const std::vector<vec2f> &opacitPoints,
+            const std::vector<vec3f> &colors,
+            const std::vector<float> &opacities) {
           if (whichTFn != -1) {
             auto &tfn =
                 *(transferFunctions[selected]->nodeAs<sg::TransferFunction>());
-            auto &colors = tfn.colors;
-            auto &opacities = tfn.opacities;
-
-            colors.resize(colorsAndOpacities.size());
-            opacities.resize(colorsAndOpacities.size());
-
-            // Separate out colors
-            std::transform(colorsAndOpacities.begin(),
-                colorsAndOpacities.end(),
-                colors.begin(),
-                [](vec4f c4) { return vec3f(c4[0], c4[1], c4[2]); });
-
-            // Separate out opacities
-            std::transform(colorsAndOpacities.begin(),
-                colorsAndOpacities.end(),
-                opacities.begin(),
-                [](vec4f c4) { return c4[3]; });
-
-            tfn.createChildData("color", colors);
-            tfn.createChildData("opacity", opacities);
+            tfn.setColorPointsAndOpacityPoints(colorPoints, opacitPoints);
+            tfn.setColorsAndOpacties(colors, opacities);
             tfn["value"] = valueRange;
           }
         };
@@ -816,23 +801,13 @@ void WindowsBuilder::buildWindowTransferFunctionEditor()
           selected = t.first;
 
           auto &tfn = *(t.second->nodeAs<sg::TransferFunction>());
-          const auto numSamples = tfn.colors.size();
+          const auto numSamples = tfn.colorPoints.size();
 
           if (numSamples > 1) {
             auto vRange = tfn["value"].valueAs<range1f>();
-
-            // Create a c4 from c3 + opacity
-            std::vector<vec4f> c4;
-
-            if (tfn.opacities.size() != numSamples)
-              tfn.opacities.resize(numSamples, tfn.opacities.back());
-
-            for (int n = 0; n < numSamples; n++) {
-              c4.emplace_back(vec4f(tfn.colors.at(n), tfn.opacities.at(n)));
-            }
-
             transferFunctionWidget.setValueRange(vRange);
-            transferFunctionWidget.setColorsAndOpacities(c4);
+            transferFunctionWidget.setColorPointsAndOpacityPoints(
+                tfn.colorPoints, tfn.opacityPoints);
           }
         }
         i++;

@@ -309,9 +309,31 @@ OSPSG_INTERFACE void importScene(
         xfmNode.add(xfm->child("rotation"));
         xfmNode.add(xfm->child("translation"));
         xfmNode.add(xfm->child("scale"));
+        auto transferFunctionPtr = findFirstChild(xfm, "transferFunction");
+        auto volumeNodes = xfmNode.childrenOfType(NodeType::VOLUME);
+        auto volumeNode = volumeNodes.empty() ? nullptr : volumeNodes[0];
+        if (transferFunctionPtr && volumeNode) {
+          volumeNode->add(transferFunctionPtr);
+        }
       }
     }
   }
+
+  context->refreshScene(false);
+}
+
+sg::TransferFunction &Importer::getOrCreateTransferFunctionNode(
+    sg::NodePtr const rootNode, const std::string &subType)
+{
+  const std::string tfName = "transferFunction";
+  std::shared_ptr<TransferFunction> tfPtr = nullptr;
+  if (rootNode->hasChild(tfName)) {
+    tfPtr = rootNode->childNodeAs<TransferFunction>(tfName);
+  } else {
+    tfPtr = rootNode->createChildAs<TransferFunction>(tfName, subType)
+                .nodeAs<TransferFunction>();
+  }
+  return *tfPtr;
 }
 
 // global assets catalogue

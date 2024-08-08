@@ -33,11 +33,10 @@ namespace help {
 }  // namespace help
 
 TransferFunctionWidget::TransferFunctionWidget(
-    std::function<void(const range1f &, const std::vector<vec4f> &)>
-        _transferFunctionUpdatedCallback,
+    TransferFunctionUpdatedCallback _updatedCallback,
     const range1f &_valueRange,
     const std::string &_widgetName)
-    : transferFunctionUpdatedCallback(_transferFunctionUpdatedCallback),
+    : updatedCallback(_updatedCallback),
       valueRange(_valueRange),
       widgetName(_widgetName)
 {
@@ -47,8 +46,7 @@ TransferFunctionWidget::TransferFunctionWidget(
   tfnOpacityPoints = &(tfnsOpacityPoints[currentMap]);
   tfnEditable      = tfnsEditable[currentMap];
 
-  transferFunctionUpdatedCallback(getValueRange(),
-                                  getSampledColorsAndOpacities());
+  invokeUpdatedCallback();
 
   // set ImGui double click time to 1s, so it also works for slower frame rates
   ImGuiIO &io             = ImGui::GetIO();
@@ -66,8 +64,7 @@ void TransferFunctionWidget::updateUI()
 {
   if (tfnChanged) {
     updateTfnPaletteTexture();
-    transferFunctionUpdatedCallback(getValueRange(),
-                                    getSampledColorsAndOpacities());
+    invokeUpdatedCallback();
     tfnChanged = false;
   }
 
@@ -130,20 +127,18 @@ void TransferFunctionWidget::setValueRange(const range1f &range)
   valueRange = range;
 }
 
-void TransferFunctionWidget::setColorsAndOpacities(
-    const std::vector<vec4f> &colors)
+void TransferFunctionWidget::setColorPointsAndOpacityPoints(
+    const std::vector<vec4f> &colorPoints,
+    const std::vector<vec2f> &opacityPoints)
 {
-  const auto numSamples = colors.size();
-  const float dx = 1.f / (numSamples - 1);
-
-  tfnColorPoints->resize(numSamples);
-  tfnOpacityPoints->resize(numSamples);
-
-  for (int i = 0; i < (int) numSamples; i++) {
-    vec4f c4 = colors.at(i);
-    tfnColorPoints->at(i) = ColorPoint(i * dx, c4.x, c4.y, c4.z);
-    tfnOpacityPoints->at(i) = OpacityPoint(i * dx, c4.w);
-  }
+  tfnColorPoints->clear();
+  tfnOpacityPoints->clear();
+  std::for_each(colorPoints.begin(),
+      colorPoints.end(),
+      [this](const vec4f &cp) { tfnColorPoints->emplace_back(cp); });
+  std::for_each(opacityPoints.begin(),
+      opacityPoints.end(),
+      [this](const vec2f &op) { tfnOpacityPoints->emplace_back(op); });
 }
 
 range1f TransferFunctionWidget::getValueRange()
@@ -151,20 +146,26 @@ range1f TransferFunctionWidget::getValueRange()
   return valueRange;
 }
 
-std::vector<vec4f> TransferFunctionWidget::getSampledColorsAndOpacities(
-    int numSamples)
+std::tuple<std::vector<vec3f>, std::vector<float>>
+TransferFunctionWidget::getColorsAndOpacities(int numSamples)
 {
-  std::vector<vec4f> sampledColorsAndOpacities;
-
+  std::vector<vec3f> sampledColors;
+  std::vector<float> sampledOpacities;
   const float dx = 1.f / (numSamples - 1);
 
   for (int i = 0; i < numSamples; i++) {
-    sampledColorsAndOpacities.push_back(vec4f(
-        interpolateColor(*tfnColorPoints, i * dx),
-        interpolateOpacity(*tfnOpacityPoints, i * dx) * globalOpacityScale));
+    sampledColors.push_back(interpolateColor(*tfnColorPoints, i * dx));
+    sampledOpacities.push_back(
+        interpolateOpacity(*tfnOpacityPoints, i * dx) * globalOpacityScale);
   }
 
-  return sampledColorsAndOpacities;
+  return std::make_tuple(sampledColors, sampledOpacities);
+}
+
+std::tuple<std::vector<vec4f>, std::vector<vec2f>>
+TransferFunctionWidget::getColorPointsAndOpacityPoints()
+{
+  return std::make_tuple(*tfnColorPoints, *tfnOpacityPoints);
 }
 
 void TransferFunctionWidget::loadDefaultMaps()
@@ -303,7 +304,15 @@ void TransferFunctionWidget::updateTfnPaletteTexture()
   }
 
   // sample the palette then upload the data
-  std::vector<vec4f> palette = getSampledColorsAndOpacities(textureWidth);
+  std::vector<vec3f> colors;
+  std::vector<float> opacities;
+  std::tie(colors, opacities) = getColorsAndOpacities(textureWidth);
+  std::vector<vec4f> palette;
+  for (size_t i = 0; i < textureWidth; ++i) {
+    vec3f color = colors[i];
+    float opacity = opacities[i];
+    palette.emplace_back(color.x, color.y, color.z, opacity);
+  }
 
   // save palette to texture
   glBindTexture(GL_TEXTURE_2D, tfnPaletteTexture);
@@ -604,4 +613,21 @@ void TransferFunctionWidget::drawEditor()
   canvas_avail_y -= 4.f * color_len + margin;
 
   ImGui::SetCursorScreenPos(ImVec2(canvas_x, canvas_y));
+}
+
+void TransferFunctionWidget::invokeUpdatedCallback()
+{
+  std::vector<vec4f> colorPoints;
+  std::vector<vec2f> opacityPoints;
+  std::tie(colorPoints, opacityPoints) = getColorPointsAndOpacityPoints();
+
+  std::vector<vec3f> colors;
+  std::vector<float> opacities;
+  std::tie(colors, opacities) = getColorsAndOpacities();
+
+  updatedCallback(getValueRange(),
+      colorPoints,
+      opacityPoints,
+      colors,
+      opacities);
 }

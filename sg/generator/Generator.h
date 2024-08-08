@@ -5,6 +5,7 @@
 
 #include "../Node.h"
 #include "sg/renderer/MaterialRegistry.h"
+#include "sg/scene/transfer_function/TransferFunction.h"
 
 namespace ospray {
 namespace sg {
@@ -29,6 +30,9 @@ struct OSPSG_INTERFACE Generator : public Node
 
  protected:
   std::shared_ptr<sg::MaterialRegistry> materialRegistry = nullptr;
+
+  virtual sg::TransferFunction &getOrCreateTransferFunctionNode(
+      const std::string &subType);
 };
 
 } // namespace sg
