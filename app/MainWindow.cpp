@@ -431,8 +431,8 @@ void MainWindow::resetArcball()
 void MainWindow::pickCenterOfRotation(float x, float y)
 {
   vec3f worldPosition;
-  x = clamp(x / windowSize.x, 0.f, 1.f);
-  y = 1.f - clamp(y / windowSize.y, 0.f, 1.f);
+  x = rkcommon::math::clamp(x / windowSize.x, 0.f, 1.f);
+  y = 1.f - rkcommon::math::clamp(y / windowSize.y, 0.f, 1.f);
   if (ctx->resHasHit(x, y, worldPosition)) {
     if (!(glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)) {
       // Constraining rotation around the up works pretty well.
@@ -525,10 +525,10 @@ void MainWindow::motion(const vec2f &position)
 
   auto displaySize = windowSize * contentScale;
 
-  const vec2f mouseFrom(clamp(prev.x * 2.f / displaySize.x - 1.f, -1.f, 1.f),
-      clamp(prev.y * 2.f / displaySize.y - 1.f, -1.f, 1.f));
-  const vec2f mouseTo(clamp(mouse.x * 2.f / displaySize.x - 1.f, -1.f, 1.f),
-      clamp(mouse.y * 2.f / displaySize.y - 1.f, -1.f, 1.f));
+  const vec2f mouseFrom(rkcommon::math::clamp(prev.x * 2.f / displaySize.x - 1.f, -1.f, 1.f),
+      rkcommon::math::clamp(prev.y * 2.f / displaySize.y - 1.f, -1.f, 1.f));
+  const vec2f mouseTo(rkcommon::math::clamp(mouse.x * 2.f / displaySize.x - 1.f, -1.f, 1.f),
+      rkcommon::math::clamp(mouse.y * 2.f / displaySize.y - 1.f, -1.f, 1.f));
 
   if (leftDown) {
     arcballCamera->constrainedRotate(mouseFrom,

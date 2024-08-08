@@ -65,9 +65,9 @@ namespace ospray {
       }
 
       if (!failedParse) {
-        clamp(r, 0x00, 0xff);
-        clamp(g, 0x00, 0xff);
-        clamp(b, 0x00, 0xff);
+        rkcommon::math::clamp(r, 0x00, 0xff);
+        rkcommon::math::clamp(g, 0x00, 0xff);
+        rkcommon::math::clamp(b, 0x00, 0xff);
         RGB = vec3f(r, g, b) / 255.f;
         if (isSRGB)
           srgb_to_linear(RGB);
