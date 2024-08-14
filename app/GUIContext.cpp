@@ -562,6 +562,8 @@ void GUIContext::useSceneCamera()
   }
 }
 
+#define JSON_INDENT_LEVEL 4
+
 void GUIContext::saveSGScene()
 {
   std::ofstream dump("studio_scene.sg");
@@ -579,7 +581,7 @@ void GUIContext::saveSGScene()
       {"lightsManager", *lightsManager},
       {"materialRegistry", *baseMaterialRegistry},
       {"animation", animation}};
-  dump << j.dump();
+  dump << j.dump(JSON_INDENT_LEVEL);
 }
 
 void GUIContext::saveNodesJson(const std::string nodeTypeStr)
@@ -587,17 +589,17 @@ void GUIContext::saveNodesJson(const std::string nodeTypeStr)
   if (nodeTypeStr == "baseMaterialRegistry") {
     std::ofstream materials("studio_materials.sg");
     JSON j = {{"materialRegistry", *baseMaterialRegistry}};
-    materials << j.dump();
+    materials << j.dump(JSON_INDENT_LEVEL);
   }
   if (nodeTypeStr == "lightsManager") {
     std::ofstream lights("studio_lights.sg");
     JSON j = {{"lightsManager", *lightsManager}};
-    lights << j.dump();
+    lights << j.dump(JSON_INDENT_LEVEL);
   }
   if (nodeTypeStr == "camera") {
     std::ofstream camera("studio_camera.sg");
     JSON j = {{"camera", mainWindow->arcballCamera->getState()}};
-    camera << j.dump();
+    camera << j.dump(JSON_INDENT_LEVEL);
   }
 }
 
