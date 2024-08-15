@@ -40,6 +40,7 @@ enum class StudioMode
   BATCH,
   HEADLESS,
   BENCHMARK,
+  PIXEL_HEAL_THYSELF,
 };
 
 enum class OSPRayRendererType
@@ -59,6 +60,8 @@ const static std::map<std::string, StudioMode> StudioModeMap = {
     {"batch", StudioMode::BATCH},
     {"server", StudioMode::HEADLESS},
     {"benchmark", StudioMode::BENCHMARK},
+    {"pixel_heal_thyself", StudioMode::PIXEL_HEAL_THYSELF},
+    {"pht", StudioMode::PIXEL_HEAL_THYSELF},
 };
 
 const static std::map<std::string, vec2i> standardResolutionSizeMap = {

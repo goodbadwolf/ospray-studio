@@ -24,6 +24,8 @@ add_executable(ospStudio
 
   $<$<BOOL:${USE_BENCHMARK}>:Benchmark.cpp>
 
+  PHTContext.cpp
+
   ${OSPRAY_STUDIO_RESOURCE_FILE}
 )
 

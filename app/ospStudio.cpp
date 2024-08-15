@@ -5,6 +5,7 @@
 
 #include "Batch.h"
 #include "GUIContext.h"
+#include "PHTContext.h"
 
 // CLI
 #include <CLI11.hpp>
@@ -415,6 +416,9 @@ int main(int argc, const char *argv[])
 #else
       std::cerr << "Benchmark mode not enabled.  Recompile with -DUSE_BENCHMARK=ON\n";
 #endif
+      break;
+    case StudioMode::PIXEL_HEAL_THYSELF:
+      context = std::make_shared<PixelHealThyselfContext>(studioCommon);
       break;
     default:
       std::cerr << "unknown mode!  How did I get here?!\n";

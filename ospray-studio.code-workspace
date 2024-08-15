@@ -86,6 +86,13 @@
 			"*.sg": "json"
 		},
 		"editor.formatOnSaveMode": "modifications",
-		"C_Cpp.dimInactiveRegions": false
+		"C_Cpp.dimInactiveRegions": false,
+		"C_Cpp.default.includePath": [
+			"../ospray/install/ospray/include",
+			"${workspaceFolder}/**",
+			"${workspaceFolder}/build/_deps/rkcommon-src",
+			"${workspaceFolder}/build/",
+			"${workspaceFolder}/build/sg"
+		]
 	}
 }
