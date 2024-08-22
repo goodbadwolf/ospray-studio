@@ -20,6 +20,7 @@
 
 // CLI
 #include <CLI11.hpp>
+#include "FileUtils.h"
 
 struct FibonacciLatticeCameraGenerator
     : public PixelHealThyselfContext::CameraGeneratorBase
@@ -177,6 +178,8 @@ void PixelHealThyselfContext::addToCommandLine(std::shared_ptr<CLI::App> app)
   app->add_option("--zoom", optZoom, "Zoom amount for camera samples")
       ->check(CLI::Number);
 
+  app->add_option("--outputPath", optOutputPath, "Path to save images to");
+
   app->add_flag("--forceOverwrite",
       optForceOverwrite,
       "Force overwriting saved files if they exist");
@@ -268,6 +271,11 @@ void PixelHealThyselfContext::renderFrame()
       filename = optImageName + filenumber + optImageFormat;
     }
     filenum += 1;
+
+    if (optOutputPath != "") {
+      FileUtils::MakeDirectory(optOutputPath);
+      filename = optOutputPath + "/" + filename;
+    }
 
     int screenshotFlags = optSaveLayersSeparately << 3 | optSaveNormal << 2
         | optSaveDepth << 1 | optSaveAlbedo;

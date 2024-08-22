@@ -130,6 +130,7 @@ class PixelHealThyselfContext : public StudioContext
   int optNumFrames{32};
   float optJitter{0.0f};
   float optZoom{0.0f};
+  std::string optOutputPath;
 
   NodePtr importedModels;
   std::shared_ptr<CameraGeneratorBase> cameraGenerator;
