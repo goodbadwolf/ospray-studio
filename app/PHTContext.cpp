@@ -42,6 +42,7 @@ struct FibonacciLatticeCameraGenerator
     // Based on
     // https://web.archive.org/web/20200608045615/https://extremelearning.com.au/how-to-evenly-distribute-points-on-a-sphere-more-effectively-than-the-canonical-fibonacci-lattice/
 
+    /*
     static const float goldenRatio = 1 + sqrt(5.0f) / 2;
     float theta = 2.0f * M_PI * sampleIndex / goldenRatio;
     float phi = std::acos(
@@ -49,6 +50,16 @@ struct FibonacciLatticeCameraGenerator
     float x = std::cos(theta) * std::sin(phi);
     float y = std::sin(theta) * std::sin(phi);
     float z = std::cos(phi);
+    */
+
+    float phi = M_PI * (rkcommon::math::rsqrt(5.0f) - 1.0f);
+    float t = (sampleIndex + epsilon) / (numSamples - 1 + 2 * epsilon);
+    float y = 1.0f - 2.0f * t;
+    float radius = std::sqrt(1.0f - y * y);
+    float theta = 2.0f * M_PI * sampleIndex / phi;
+    float x = std::cos(theta) * radius;
+    float z = std::sin(theta) * radius;
+
     if (flipYZ) {
       std::swap(y, z);
     }
