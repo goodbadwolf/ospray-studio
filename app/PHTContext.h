@@ -35,6 +35,8 @@ class PixelHealThyselfContext : public StudioContext
     CameraGeneratorBase(box3f worldBounds_, int numSamples_)
         : worldBounds(worldBounds_),
           numSamples(numSamples_),
+          startFrame(0),
+          flipYZ(false),
           zoom(0.0f),
           jitter(0.0f) {};
 
@@ -59,8 +61,9 @@ class PixelHealThyselfContext : public StudioContext
     }
 
     box3f worldBounds;
-    bool flipYZ{false};
     int numSamples{32};
+    int startFrame{0};
+    bool flipYZ{false};
     float zoom{0.0f};
     float jitter{0.0f};
 
@@ -128,6 +131,7 @@ class PixelHealThyselfContext : public StudioContext
   CameraGenerator optCameraGenerator{CameraGenerator::FIBONACCI};
   bool optCameraGeneratorFlipYZ;
   int optNumFrames{32};
+  int optStartFrame{0};
   float optJitter{0.0f};
   float optZoom{0.0f};
   std::string optOutputPath;

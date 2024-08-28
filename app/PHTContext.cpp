@@ -12,6 +12,9 @@
 #include "sg/visitors/Commit.h"
 #include "sg/visitors/PrintNodes.h"
 
+// utils
+#include "FileUtils.h"
+
 // rkcommon
 #include "rkcommon/utility/SaveImage.h"
 // json
@@ -20,7 +23,6 @@
 
 // CLI
 #include <CLI11.hpp>
-#include "FileUtils.h"
 
 struct FibonacciLatticeCameraGenerator
     : public PixelHealThyselfContext::CameraGeneratorBase
@@ -34,6 +36,7 @@ struct FibonacciLatticeCameraGenerator
     CameraGeneratorBase::Reset();
     worldDiagonal = length(worldBounds.size());
     epsilon = CalculateEpsilon(numSamples);
+    sampleIndex = startFrame;
   }
 
  protected:
@@ -137,6 +140,7 @@ void PixelHealThyselfContext::start()
 
   cameraGenerator = std::make_shared<FibonacciLatticeCameraGenerator>(
       getSceneBounds(), optNumFrames);
+  cameraGenerator->startFrame = optStartFrame;
   cameraGenerator->zoom = optZoom;
   cameraGenerator->jitter = optJitter;
   cameraGenerator->flipYZ = optCameraGeneratorFlipYZ;
@@ -182,6 +186,9 @@ void PixelHealThyselfContext::addToCommandLine(std::shared_ptr<CLI::App> app)
 
   app->add_option("--numFrames", optNumFrames, "Number of frames to generate")
       ->check(CLI::PositiveNumber);
+
+  app->add_option("--startFrame", optStartFrame, "Starting frame number")
+      ->check(CLI::NonNegativeNumber);
 
   app->add_option("--jitter", optJitter, "Jitter amount for camera samples")
       ->check(CLI::Number);
@@ -267,7 +274,7 @@ void PixelHealThyselfContext::renderFrame()
     std::cout << "variance " << fbVariance << std::endl;
   } while (fbVariance >= varianceThreshold && !frame->accumLimitReached());
 
-  static int filenum = 0;
+  static int filenum = optStartFrame;
   if (!sgUsingMpi() || sgMpiRank() == 0) {
     std::string filename;
     char filenumber[8];
