@@ -264,6 +264,11 @@ void GUIContext::saveRendererParams()
 
 void GUIContext::refreshScene(bool resetCam)
 {
+  // Force float buffer format for framebuffer
+  auto &frameBuffer = frame->childAs<sg::FrameBuffer>("framebuffer");
+  frameBuffer["floatFormat"] = true;
+  frameBuffer.commit();
+
   if (frameAccumLimit)
     frame->accumLimit = frameAccumLimit;
   // Check that the frame contains a world, if not create one
