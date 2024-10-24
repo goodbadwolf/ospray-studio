@@ -18,7 +18,7 @@ Volume::Volume(const std::string &osp_type)
       "0 = nearest,\n"
       "100 = linear\n"
       "200 = cubic",
-      OSP_VOLUME_FILTER_NEAREST);
+      OSP_VOLUME_FILTER_CUBIC);
   createChild("densityScale",
       "float",
       "makes volumes uniformly thinner or thicker\n"
