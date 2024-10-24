@@ -93,6 +93,7 @@
 			"${workspaceFolder}/build/_deps/rkcommon-src",
 			"${workspaceFolder}/build/",
 			"${workspaceFolder}/build/sg"
-		]
+		],
+		"cmake.buildDirectory": "${workspaceFolder}/vs_build"
 	}
 }

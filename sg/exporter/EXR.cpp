@@ -23,6 +23,8 @@ namespace ospray {
     void doExport() override;
     template <typename T>
     T* flipBuffer(const void *buf, int ncomp = 4);
+    float *normalize1DBuffer(
+        const float *buff, float nan_value = 0.0f, float inf_value = 1.0f);
 
    private:
     void doExportAsLayers();
@@ -102,10 +104,11 @@ namespace ospray {
     }
 
     if (hasChild("Z")) {
-      exrHeader.channels().insert("Z", Imf::Channel(IMF::FLOAT));
+      exrHeader.channels().insert("depth", Imf::Channel(IMF::FLOAT));
       const void *z = child("Z").valueAs<const void *>();
       flippedBuffers["Z"] = flipBuffer<float>(z, 1);
-      exrFb.insert("Z", makeSlice(flippedBuffers["Z"], 0, 1));
+      flippedBuffers["depth"] = normalize1DBuffer(flippedBuffers["Z"]);
+      exrFb.insert("depth", makeSlice(flippedBuffers["depth"], 0, 1));
     }
 
     if (hasChild("normal")) {
@@ -237,15 +240,15 @@ namespace ospray {
 
     if (hasChild("Z")) {
       Imf::Header depthHeader(size.x, size.y);
-      depthHeader.channels().insert("R", Imf::Channel(IMF::FLOAT));
-
+      depthHeader.channels().insert("depth", Imf::Channel(IMF::FLOAT));
       const void *z       = child("Z").valueAs<const void *>();
       flippedBuffers["Z"] = flipBuffer<float>(z, 1);
+      flippedBuffers["depth"] = normalize1DBuffer(flippedBuffers["Z"]);
 
       Imf::FrameBuffer depthFb;
-      depthFb.insert("R", makeSlice(flippedBuffers["Z"], 0, 1));
+      depthFb.insert("depth", makeSlice(flippedBuffers["depth"], 0, 1));
 
-      std::string depthFilename = base + ".z." + ext;
+      std::string depthFilename = base + ".dpt." + ext;
       Imf::OutputFile depthFile(depthFilename.c_str(), depthHeader);
       depthFile.setFrameBuffer(depthFb);
       depthFile.writePixels(size.y);
@@ -293,6 +296,40 @@ namespace ospray {
     }
 
     return flipped;
+  }
+
+  float *EXRExporter::normalize1DBuffer(
+      const float *buff, float nan_value, float inf_value)
+  {
+    /* Normalizes the 1D buffer, to the range of 0.0f to 1.0f, converting nan
+     * values to 0.0f, inf values to 1.0f*/
+
+    vec2i size = child("size").valueAs<vec2i>();
+    int numPixels = size.x * size.y;
+    float *normalized = (float *)std::malloc(numPixels * sizeof(float));
+
+    float minValue = rkcommon::math::inf;
+    float maxValue = rkcommon::math::neg_inf;
+    for (int i = 0; i < numPixels; i++) {
+      float value = buff[i];
+      if (isinf(value) || isnan(value))
+        continue;
+      minValue = std::min(minValue, value);
+      maxValue = std::max(maxValue, value);
+    }
+
+    const float rcpRange = 1.f / (maxValue - minValue);
+    for (int i = 0; i < numPixels; i++) {
+      float value = buff[i];
+      if (isinf(value)) {
+        normalized[i] = inf_value;
+      } else if (isnan(value)) {
+        normalized[i] = nan_value;
+      } else {
+        normalized[i] = (value - minValue) * rcpRange;
+      }
+    }
+    return normalized;
   }
 
   }  // namespace sg
