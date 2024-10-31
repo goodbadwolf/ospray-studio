@@ -104,11 +104,11 @@ namespace ospray {
     }
 
     if (hasChild("Z")) {
-      exrHeader.channels().insert("depth", Imf::Channel(IMF::FLOAT));
+      exrHeader.channels().insert("depth.R", Imf::Channel(IMF::FLOAT));
       const void *z = child("Z").valueAs<const void *>();
       flippedBuffers["Z"] = flipBuffer<float>(z, 1);
       flippedBuffers["depth"] = normalize1DBuffer(flippedBuffers["Z"]);
-      exrFb.insert("depth", makeSlice(flippedBuffers["depth"], 0, 1));
+      exrFb.insert("depth.R", makeSlice(flippedBuffers["depth"], 0, 1));
     }
 
     if (hasChild("normal")) {
