@@ -69,7 +69,7 @@ namespace ospray {
     exrHeader.channels().insert("R", Imf::Channel(IMF::FLOAT));
     exrHeader.channels().insert("G", Imf::Channel(IMF::FLOAT));
     exrHeader.channels().insert("B", Imf::Channel(IMF::FLOAT));
-    exrHeader.channels().insert("A", Imf::Channel(IMF::FLOAT));
+    // exrHeader.channels().insert("A", Imf::Channel(IMF::FLOAT));
 
     auto makeSlice = [&](const void *fb, int offset, int ncomp = 4) {
       // flip the data
@@ -90,7 +90,7 @@ namespace ospray {
     exrFb.insert("R", makeSlice(flippedBuffers["fb"], 0));
     exrFb.insert("G", makeSlice(flippedBuffers["fb"], 1));
     exrFb.insert("B", makeSlice(flippedBuffers["fb"], 2));
-    exrFb.insert("A", makeSlice(flippedBuffers["fb"], 3));
+    // exrFb.insert("A", makeSlice(flippedBuffers["fb"], 3));
 
     if (hasChild("albedo")) {
       exrHeader.channels().insert("albedo.R", Imf::Channel(IMF::FLOAT));
