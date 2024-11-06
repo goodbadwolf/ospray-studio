@@ -114,6 +114,9 @@ PixelHealThyselfContext::PixelHealThyselfContext(StudioCommon &_common)
   pluginManager = std::make_shared<PluginManager>();
   // Default saved image baseName (cmdline --image to override)
   optImageName = "ospPHT";
+  if (frame->hasChild("framebuffer")) {
+    framebuffer = frame->child("framebuffer").nodeAs<sg::FrameBuffer>();
+  }
 }
 
 void PixelHealThyselfContext::start()
@@ -132,6 +135,13 @@ void PixelHealThyselfContext::start()
     std::cerr
         << "Failed to parse command line args correctly or nothing to do. Exiting....\n";
     return;
+  }
+
+  if (studioCommon.denoiserAvailable && optDenoiser) {
+    frame->denoiseFB = true;
+    frame->denoiseFBFinalFrame = optDenoiseFinalFrame;
+    framebuffer->child("floatFormat") = true;
+    framebuffer->commit();
   }
 
   updateRenderer();

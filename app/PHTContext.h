@@ -131,6 +131,8 @@ class PixelHealThyselfContext : public StudioContext
   void preRender();
   void renderFrame();
 
+  std::shared_ptr<sg::FrameBuffer> framebuffer = nullptr;
+
   bool optForceOverwrite{false};
   CameraGenerator optCameraGenerator{CameraGenerator::FIBONACCI};
   bool optCameraGeneratorFlipYZ;
