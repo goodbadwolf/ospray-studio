@@ -26,6 +26,7 @@ add_executable(ospStudio
 
   PHTContext.cpp
   FileUtils.cpp
+  ProfilerUtils.cpp
 
   ${OSPRAY_STUDIO_RESOURCE_FILE}
 )

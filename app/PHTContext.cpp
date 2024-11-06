@@ -14,6 +14,7 @@
 
 // utils
 #include "FileUtils.h"
+#include "ProfilerUtils.h"
 
 // rkcommon
 #include "rkcommon/utility/SaveImage.h"
@@ -157,6 +158,7 @@ void PixelHealThyselfContext::start()
   cameraGenerator->Reset();
 
   while (cameraGenerator->HasNext()) {
+    PROFILE_START(Frame);
     auto cameraSample = cameraGenerator->Next();
     camera->child("position").setValue(cameraSample.pos);
     camera->child("direction").setValue(cameraSample.dir);
@@ -165,6 +167,7 @@ void PixelHealThyselfContext::start()
     updateCamera();
     preRender();
     renderFrame();
+    PROFILE_END(Frame);
     saveFrame();
   }
 
