@@ -130,6 +130,7 @@ class PixelHealThyselfContext : public StudioContext
   void updateRenderer();
   void preRender();
   void renderFrame();
+  void saveFrame();
 
   std::shared_ptr<sg::FrameBuffer> framebuffer = nullptr;
 

@@ -165,6 +165,7 @@ void PixelHealThyselfContext::start()
     updateCamera();
     preRender();
     renderFrame();
+    saveFrame();
   }
 
   sg::clearAssets();
@@ -286,7 +287,10 @@ void PixelHealThyselfContext::renderFrame()
     std::cout << "frame " << frame->currentAccum << " ";
     std::cout << "variance " << fbVariance << std::endl;
   } while (fbVariance >= varianceThreshold && !frame->accumLimitReached());
+}
 
+void PixelHealThyselfContext::saveFrame()
+{
   static int filenum = optStartFrame;
   if (!sgUsingMpi() || sgMpiRank() == 0) {
     std::string filename;
