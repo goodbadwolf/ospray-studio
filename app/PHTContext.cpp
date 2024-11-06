@@ -36,7 +36,6 @@ struct FibonacciLatticeCameraGenerator
     CameraGeneratorBase::Reset();
     worldDiagonal = length(worldBounds.size());
     epsilon = CalculateEpsilon(numSamples);
-    sampleIndex = startFrame;
   }
 
  protected:
@@ -141,6 +140,7 @@ void PixelHealThyselfContext::start()
   cameraGenerator = std::make_shared<FibonacciLatticeCameraGenerator>(
       getSceneBounds(), optNumFrames);
   cameraGenerator->startFrame = optStartFrame;
+  cameraGenerator->endFrame = optEndFrame;
   cameraGenerator->zoom = optZoom;
   cameraGenerator->jitter = optJitter;
   cameraGenerator->flipYZ = optCameraGeneratorFlipYZ;
@@ -189,6 +189,9 @@ void PixelHealThyselfContext::addToCommandLine(std::shared_ptr<CLI::App> app)
 
   app->add_option("--startFrame", optStartFrame, "Starting frame number")
       ->check(CLI::NonNegativeNumber);
+
+  app->add_option("--endFrame", optEndFrame, "Ending frame number. -1 for all")
+      ->check(CLI::Number);
 
   app->add_option("--jitter", optJitter, "Jitter amount for camera samples")
       ->check(CLI::Number);

@@ -36,6 +36,7 @@ class PixelHealThyselfContext : public StudioContext
         : worldBounds(worldBounds_),
           numSamples(numSamples_),
           startFrame(0),
+          endFrame(-1),
           flipYZ(false),
           zoom(0.0f),
           jitter(0.0f) {};
@@ -44,12 +45,14 @@ class PixelHealThyselfContext : public StudioContext
 
     virtual void Reset()
     {
-      sampleIndex = 0;
+      sampleIndex = std::min(std::max(0, startFrame), numSamples - 1);
     }
 
     virtual bool HasNext()
     {
-      return sampleIndex < numSamples;
+      int endFrame = this->endFrame != -1 ? this->endFrame : numSamples;
+      endFrame = std::min(endFrame, numSamples);
+      return sampleIndex < endFrame;
     }
 
     CameraSample Next()
@@ -63,6 +66,7 @@ class PixelHealThyselfContext : public StudioContext
     box3f worldBounds;
     int numSamples{32};
     int startFrame{0};
+    int endFrame{-1};
     bool flipYZ{false};
     float zoom{0.0f};
     float jitter{0.0f};
@@ -132,6 +136,7 @@ class PixelHealThyselfContext : public StudioContext
   bool optCameraGeneratorFlipYZ;
   int optNumFrames{32};
   int optStartFrame{0};
+  int optEndFrame{-1};
   float optJitter{0.0f};
   float optZoom{0.0f};
   std::string optOutputPath;
