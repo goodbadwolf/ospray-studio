@@ -242,6 +242,7 @@ void GUIContext::refreshRenderer()
   r["backgroundColor"] = optBackGroundColor;
   r["pixelSamples"] = optSPP;
   r["varianceThreshold"] = optVariance;
+  r["minContribution"] = minContribution;
   if (r.hasChild("maxContribution") && maxContribution < (float)math::inf)
     r["maxContribution"] = maxContribution;
 

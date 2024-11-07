@@ -185,6 +185,7 @@ class StudioContext : public std::enable_shared_from_this<StudioContext>
   std::string optSceneConfig{""};
   std::string optInstanceConfig{""};
   bool optDoAsyncTasking{false};
+  float minContribution{0.001f};
   float maxContribution{math::inf};
   int frameAccumLimit{0};
   std::string optImageName{"studio"}; // (each mode sets this default)

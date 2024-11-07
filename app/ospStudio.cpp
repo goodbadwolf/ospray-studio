@@ -221,6 +221,10 @@ void StudioContext::addToCommandLine(std::shared_ptr<CLI::App> app)
     pointSize,
     "Set the importer's point size"
   );
+  app->add_option("--minContribution",
+         minContribution,
+         "Set min value for samples before accumulation into the framebuffer")
+      ->check(CLI::NonNegativeNumber);
   app->add_option(
     "--maxContribution",
     maxContribution,
