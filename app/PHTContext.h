@@ -127,7 +127,7 @@ class PixelHealThyselfContext : public StudioContext
   void loadCamJson() override {};
 
  protected:
-  void updateRenderer();
+  void refreshRenderer();
   void preRender();
   void renderFrame();
   void saveFrame();
@@ -146,9 +146,4 @@ class PixelHealThyselfContext : public StudioContext
 
   NodePtr importedModels;
   std::shared_ptr<CameraGeneratorBase> cameraGenerator;
-
- private:
-  vec3f camPos;
-  vec3f camUp;
-  vec3f camDir;
 };

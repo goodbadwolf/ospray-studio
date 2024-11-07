@@ -145,7 +145,7 @@ void PixelHealThyselfContext::start()
     framebuffer->commit();
   }
 
-  updateRenderer();
+  refreshRenderer();
   refreshScene(true);
 
   cameraGenerator = std::make_shared<FibonacciLatticeCameraGenerator>(
@@ -245,7 +245,7 @@ bool PixelHealThyselfContext::parseCommandLine()
   }
 }
 
-void PixelHealThyselfContext::updateRenderer()
+void PixelHealThyselfContext::refreshRenderer()
 {
   frame->createChild("renderer", "renderer_" + optRendererTypeStr);
   auto &r = frame->childAs<sg::Renderer>("renderer");
