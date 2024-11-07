@@ -306,12 +306,12 @@ void GUIContext::refreshScene(bool resetCam)
 
   frame->add(world);
 
-  if (resetCam && !sgScene) {
+  if (resetCam) { // && !sgScene) {
     // Switch back to default-camera before modifying any parameters
     changeToDefaultCamera();
     mainWindow->resetArcball();
   }
-  
+
   updateCamera();
   auto &fb = frame->childAs<FrameBuffer>("framebuffer");
   fb.resetAccumulation();
