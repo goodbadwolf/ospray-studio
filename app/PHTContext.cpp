@@ -122,7 +122,7 @@ PixelHealThyselfContext::PixelHealThyselfContext(StudioCommon &_common)
 
 void PixelHealThyselfContext::start()
 {
-  std::cerr << "Pxel Heal Thyself mode started\n";
+  std::cerr << "Pixel Heal Thyself mode started\n";
 
   // load plugins
   for (auto &p : studioCommon.pluginsToLoad)

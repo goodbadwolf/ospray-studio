@@ -96,11 +96,12 @@ void TransferFunctionWidget::updateUI()
 
   ImGui::Text("Opacity scale");
   ImGui::SameLine();
-  if (ImGui::SliderFloat("##OpacityScale", &globalOpacityScale, 0.f, 10.f))
+  if (ImGui::SliderFloat("##OpacityScale", &globalOpacityScale, 0.f, 20.f))
     tfnChanged = true;
   if (ImGui::IsItemHovered())
-    ImGui::SetTooltip("(value range is unbounded, slider is bounded for\n"
-       "convenience. shift-LMB to enter larger values manually)");
+    ImGui::SetTooltip(
+        "(value range is unbounded, slider is bounded for\n"
+        "convenience. ctrl-LMB to enter larger values manually)");
 
   ImGui::Separator();
 
