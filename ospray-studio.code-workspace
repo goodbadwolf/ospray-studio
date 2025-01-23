@@ -83,7 +83,8 @@
 			"variant": "cpp",
 			"semaphore": "cpp",
 			"*.ih": "cpp",
-			"*.sg": "json"
+			"*.sg": "json",
+			"span": "cpp"
 		},
 		"editor.formatOnSaveMode": "modifications",
 		"C_Cpp.dimInactiveRegions": false,

@@ -10,6 +10,16 @@
 namespace ospray {
 namespace sg {
 
+static std::unordered_map<std::string, OSPDataType> const rawVolumeVoxelType = {
+    {"float32", OSP_FLOAT},
+    {"float64", OSP_DOUBLE},
+    {"int8", OSP_CHAR},
+    {"int16", OSP_SHORT},
+    {"int32", OSP_INT},
+    {"uint8", OSP_UCHAR},
+    {"uint16", OSP_USHORT},
+    {"uint32", OSP_UINT}};
+
 struct RawImporter : public Importer
 {
   RawImporter() = default;
@@ -73,6 +83,50 @@ void RawImporter::importScene()
       auto &p = c.second;
       volume->createChild(p->name(), p->subType(), p->description(), p->value());
     }
+
+    std::cout << "Attempting to parse dimensions from " << fileName.str()
+              << std::endl;
+    // The file name is expected to be in the format:
+    //   <name>_XxYxZ_<type>.raw
+    // where X, Y, and Z are the dimensions of the volume
+    auto name = fileName.base();
+    // Last underscore before the extension
+    auto lastUnderscore = name.find_last_of("_");
+    if (lastUnderscore == std::string::npos) {
+      throw std::runtime_error("Invalid file name: " + name);
+    }
+    // Second to last underscore before the extension
+    auto secondToLastUnderscore = name.find_last_of("_", lastUnderscore - 1);
+
+    // Everything between the second to last underscore and the last underscore
+    // is the dimensions string
+    auto dimensionsStr = name.substr(
+        secondToLastUnderscore + 1, lastUnderscore - lastUnderscore - 1);
+    std::cout << "Dimensions string: " << dimensionsStr << std::endl;
+    vec3i dimensions;
+    try {
+      auto dimensionsSplit = utility::split(dimensionsStr, "x");
+      if (dimensionsSplit.size() != 3) {
+        throw std::runtime_error("Invalid dimensions string: " + dimensionsStr);
+      }
+      dimensions.x = std::stoi(dimensionsSplit[0]);
+      dimensions.y = std::stoi(dimensionsSplit[1]);
+      dimensions.z = std::stoi(dimensionsSplit[2]);
+    } catch (const std::exception &e) {
+      throw std::runtime_error(
+          "Failed to parse dimensions from " + dimensionsStr + ": " + e.what());
+    }
+    std::cout << "Parsed dimensions: " << dimensions << std::endl;
+    volume->createChild("dimensions", "vec3i", dimensions);
+
+    // Everything between the last underscore and the extension is the voxel
+    // type
+    auto extensionStart = name.find_last_of(".");
+    auto voxelTypeStr =
+        name.substr(lastUnderscore + 1, extensionStart - lastUnderscore - 1);
+    std::cout << "Voxel type: " << voxelTypeStr << std::endl;
+    auto voxelType = rawVolumeVoxelType.find(voxelTypeStr)->second;
+    volume->createChild("voxelType", "OSPDataType", voxelType);
 
     if (isSpherical) {
       auto sphericalVolume =
